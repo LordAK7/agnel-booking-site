@@ -1,0 +1,33 @@
+[
+    {
+      "staff_id": "AS001",
+      "staff_name": "Amit Sharma",
+      "staff_department": "Mathematics",
+      "staff_password": "pass1234"
+    },
+    {
+      "staff_id": "AS002",
+      "staff_name": "Priya Nair",
+      "staff_department": "English",
+      "staff_password": "eng5678"
+    },
+    {
+      "staff_id": "AS003",
+      "staff_name": "Rajesh Gupta",
+      "staff_department": "Physics",
+      "staff_password": "phy0987"
+    },
+    {
+      "staff_id": "AS004",
+      "staff_name": "Sunita Reddy",
+      "staff_department": "Chemistry",
+      "staff_password": "chem4567"
+    },
+    {
+      "staff_id": "AS005",
+      "staff_name": "Vikram Iyer",
+      "staff_department": "Biology",
+      "staff_password": "bio1234"
+    }
+  ]
+  
