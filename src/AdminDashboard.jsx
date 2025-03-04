@@ -1,0 +1,241 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from './AuthContext.jsx';
+import { supabase } from './supabaseClient';
+
+// List of admin emails - in a real app, this would be stored in the database
+const ADMIN_EMAILS = ['adityatinkercad@gmail.com'];
+
+const AdminDashboard = () => {
+  const navigate = useNavigate();
+  const { user, loading, signOut } = useAuth();
+  const [bookings, setBookings] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  // Check if user is admin
+  const isAdmin = user && ADMIN_EMAILS.includes(user.email);
+
+  // Redirect if not authenticated or not admin
+  useEffect(() => {
+    if (!loading && (!user || !isAdmin)) {
+      navigate('/dashboard');
+    }
+  }, [user, loading, navigate, isAdmin]);
+
+  // Fetch bookings
+  useEffect(() => {
+    const fetchBookings = async () => {
+      try {
+        setIsLoading(true);
+        let query = supabase.from('bookings').select('*');
+        
+        if (statusFilter !== 'all') {
+          query = query.eq('status', statusFilter);
+        }
+        
+        const { data, error } = await query.order('created_at', { ascending: false });
+        
+        console.log("Fetched bookings:", data);
+        console.log("Fetch error:", error);
+        
+        if (error) throw error;
+        setBookings(data || []);
+      } catch (error) {
+        console.error("Error in fetchBookings:", error);
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (isAdmin) {
+      fetchBookings();
+    }
+  }, [isAdmin, statusFilter]);
+
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: newStatus })
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setBookings(bookings.map(booking => 
+        booking.id === id ? { ...booking, status: newStatus } : booking
+      ));
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this booking?')) {
+      try {
+        const { error } = await supabase
+          .from('bookings')
+          .delete()
+          .eq('id', id);
+        
+        if (error) throw error;
+        
+        // Update local state
+        setBookings(bookings.filter(booking => booking.id !== id));
+      } catch (error) {
+        setError(error.message);
+      }
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  if (loading || !isAdmin) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <header className="bg-white shadow">
+        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+          <button
+            onClick={handleSignOut}
+            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          >
+            Sign Out
+          </button>
+        </div>
+      </header>
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="px-4 py-6 sm:px-0">
+          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
+              <h2 className="text-lg leading-6 font-medium text-gray-900">Booking Requests</h2>
+              <div>
+                <label htmlFor="statusFilter" className="mr-2">Filter by status:</label>
+                <select
+                  id="statusFilter"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="border border-gray-300 rounded-md shadow-sm py-1 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="all">All</option>
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+            </div>
+            
+            {error && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 m-4 rounded">
+                <p>{error}</p>
+              </div>
+            )}
+            
+            {isLoading ? (
+              <div className="text-center py-4">Loading bookings...</div>
+            ) : bookings.length === 0 ? (
+              <div className="text-center py-4">No bookings found.</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Event Details
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Booking Info
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        User
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {bookings.map((booking) => (
+                      <tr key={booking.id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{booking.event_name}</div>
+                          <div className="text-sm text-gray-500">{booking.event_type}</div>
+                          <div className="text-sm text-gray-500">{booking.institute} - {booking.department}</div>
+                          {booking.special_requests && (
+                            <div className="mt-2">
+                              <span className="text-xs font-medium text-gray-500">Special Requests:</span>
+                              <p className="text-sm text-gray-500 mt-1">{booking.special_requests}</p>
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{new Date(booking.booking_date).toLocaleDateString()}</div>
+                          <div className="text-sm text-gray-500">{booking.time_range}</div>
+                          <div className="text-sm text-gray-500">{booking.time_slot} hours</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">{booking.user_email}</div>
+                          <div className="text-sm text-gray-500">Created: {new Date(booking.created_at).toLocaleString()}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            ${booking.status === 'approved' ? 'bg-green-100 text-green-800' : 
+                              booking.status === 'rejected' ? 'bg-red-100 text-red-800' : 
+                              'bg-yellow-100 text-yellow-800'}`}>
+                            {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          {booking.status === 'pending' && (
+                            <>
+                              <button
+                                onClick={() => handleStatusChange(booking.id, 'approved')}
+                                className="text-green-600 hover:text-green-900 mr-2"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => handleStatusChange(booking.id, 'rejected')}
+                                className="text-red-600 hover:text-red-900 mr-2"
+                              >
+                                Reject
+                              </button>
+                            </>
+                          )}
+                          <button
+                            onClick={() => handleDelete(booking.id)}
+                            className="text-gray-600 hover:text-gray-900"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default AdminDashboard; 

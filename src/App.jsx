@@ -1,29 +1,30 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import LandingPage from './landingpage'
-import StaffLogin from './StaffLogin'
-import AdminLogin from './AdminLogin'
-import AdminDashboard from './components/AdminDashboard'
-import AuthGuard from './components/AuthGuard'
+import SignIn from './SignIn'
+import SignUp from './SignUp'
+import Dashboard from './Dashboard'
+import BookingPage from './BookingPage'
+import MyBookings from './MyBookings'
+import AdminDashboard from './AdminDashboard'
+import { AuthProvider } from './AuthContext.jsx'
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/staff-login" element={<StaffLogin />} />
-        <Route path="/admin-login" element={<AdminLogin />} />
-        <Route 
-          path="/admin-dashboard" 
-          element={
-            <AuthGuard>
-              <AdminDashboard />
-            </AuthGuard>
-          } 
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/booking" element={<BookingPage />} />
+          <Route path="/my-bookings" element={<MyBookings />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   )
 }
 
