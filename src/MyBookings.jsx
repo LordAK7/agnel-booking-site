@@ -5,7 +5,7 @@ import { supabase } from './supabaseClient';
 
 const MyBookings = () => {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,6 +16,11 @@ const MyBookings = () => {
       navigate('/signin');
     }
   }, [user, loading, navigate]);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
 
   // Fetch user's bookings
   useEffect(() => {
@@ -66,12 +71,20 @@ const MyBookings = () => {
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900">My Bookings</h1>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Back to Dashboard
-          </button>
+          <div className="flex space-x-4">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Back to Dashboard
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
       </header>
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">

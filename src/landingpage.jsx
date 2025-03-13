@@ -9,7 +9,7 @@ const LandingPage = () => {
   const [showSocials, setShowSocials] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const { user, envError } = useAuth();
+  const { user, envError, signOut } = useAuth();
 
   // Track scroll position for navbar effects
   useEffect(() => {
@@ -32,6 +32,11 @@ const LandingPage = () => {
 
   const handleSignUp = () => {
     navigate('/signup');
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
   };
 
   const handleNavigation = (path) => {
@@ -109,7 +114,7 @@ const LandingPage = () => {
                 <div className="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-lg flex items-center">
                   <span className="font-medium mr-2">{user.email}</span>
                   <button 
-                    onClick={() => {}} 
+                    onClick={handleSignOut} 
                     className="text-red-600 hover:text-red-800 text-sm font-medium"
                   >
                     Sign Out
@@ -175,6 +180,7 @@ const LandingPage = () => {
                   <p className="text-indigo-800 font-medium">{user.email}</p>
                 </div>
                 <button 
+                  onClick={handleSignOut}
                   className="text-red-600 hover:text-red-800 font-medium py-2"
                 >
                   Sign Out
@@ -306,7 +312,7 @@ const LandingPage = () => {
             <div className="flex items-center space-x-4">
               <span className="text-gray-700">Welcome, {user.email}</span>
               <button 
-                onClick={() => {}} 
+                onClick={handleSignOut} 
                 className="text-red-600 hover:text-red-800"
               >
                 Sign Out

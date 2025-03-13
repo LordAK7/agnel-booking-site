@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext.jsx';
 import { supabase } from './supabaseClient';
+import { getRedirectUrls } from './utils/redirects';
 
 const SignUp = () => {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
+  const redirectUrls = getRedirectUrls();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -51,7 +53,7 @@ const SignUp = () => {
             full_name: fullName,
             phone: mobileNumber
           },
-          emailRedirectTo: window.location.origin + '/signin?verified=true'
+          emailRedirectTo: redirectUrls.signInVerified
         }
       });
       

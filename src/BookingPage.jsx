@@ -7,7 +7,7 @@ import 'react-calendar/dist/Calendar.css';
 
 const BookingPage = () => {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { user, loading, signOut } = useAuth();
   
   // Form state
   const [eventName, setEventName] = useState('');
@@ -132,7 +132,7 @@ const BookingPage = () => {
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     navigate('/');
   };
 
