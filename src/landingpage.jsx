@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaMapMarkerAlt, FaCalendarAlt, FaUsersCog, FaLinkedin, FaGlobe, FaBuilding, FaSignInAlt, FaUserPlus, FaHome, FaCalendar, FaTachometerAlt } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaCalendarAlt, FaUsersCog, FaLinkedin, FaGlobe, FaBuilding, FaSignInAlt, FaUserPlus, FaHome, FaCalendar, FaTachometerAlt, FaExclamationTriangle } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { useAuth } from './AuthContext.jsx';
 
@@ -8,7 +8,8 @@ const LandingPage = () => {
   const navigate = useNavigate();
   const [showSocials, setShowSocials] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { user } = useAuth();
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const { user, envError } = useAuth();
 
   // Track scroll position for navbar effects
   useEffect(() => {
@@ -34,13 +35,28 @@ const LandingPage = () => {
   };
 
   const handleNavigation = (path) => {
+    setShowMobileMenu(false);
     navigate(path);
+  };
+
+  const toggleMobileMenu = () => {
+    setShowMobileMenu(!showMobileMenu);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-indigo-200 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      {/* Environment Error Banner */}
+      {envError && (
+        <div className="fixed top-0 left-0 right-0 bg-red-500 text-white py-2 px-4 z-50 text-center">
+          <div className="container mx-auto flex items-center justify-center">
+            <FaExclamationTriangle className="mr-2" />
+            <span>API configuration error. Please check environment variables.</span>
+          </div>
+        </div>
+      )}
+      
       {/* Floating Navigation Bar */}
-      <div className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/90 shadow-md backdrop-blur-md py-3' : 'bg-transparent py-5'}`}>
+      <div className={`fixed ${envError ? 'top-8' : 'top-0'} left-0 right-0 z-40 transition-all duration-300 ${scrolled ? 'bg-white/90 shadow-md backdrop-blur-md py-3' : 'bg-transparent py-5'}`}>
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div className="flex items-center space-x-2 cursor-pointer" onClick={() => handleNavigation('/')}>
             <img 
@@ -104,7 +120,10 @@ const LandingPage = () => {
           </div>
           
           {/* Mobile menu button */}
-          <button className="md:hidden bg-indigo-100 p-2 rounded-lg text-indigo-800">
+          <button 
+            className="md:hidden bg-indigo-100 p-2 rounded-lg text-indigo-800"
+            onClick={toggleMobileMenu}
+          >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
@@ -112,8 +131,8 @@ const LandingPage = () => {
         </div>
       </div>
       
-      {/* Mobile menu dropdown (hidden by default) */}
-      <div className="hidden fixed top-16 left-0 right-0 bg-white shadow-lg rounded-b-lg z-40 p-4 border-t border-gray-100">
+      {/* Mobile menu dropdown */}
+      <div className={`fixed ${envError ? 'top-24' : 'top-16'} left-0 right-0 bg-white shadow-lg rounded-b-lg z-30 p-4 border-t border-gray-100 transition-all duration-300 ${showMobileMenu ? 'block' : 'hidden'}`}>
         <div className="flex flex-col space-y-3">
           <MobileNavLink 
             icon={<FaHome />} 
@@ -262,6 +281,7 @@ const LandingPage = () => {
               <button
                 onClick={handleSignIn}
                 className="group relative px-10 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-lg transition duration-300 shadow-lg transform hover:-translate-y-1 hover:shadow-xl overflow-hidden"
+                disabled={envError}
               >
                 <span className="relative z-10 flex items-center justify-center">
                   <FaSignInAlt className="mr-2" />
@@ -273,6 +293,7 @@ const LandingPage = () => {
               <button
                 onClick={handleSignUp}
                 className="group relative px-10 py-4 bg-white text-indigo-600 font-medium rounded-lg border-2 border-indigo-500 transition duration-300 shadow-md transform hover:-translate-y-1 hover:shadow-lg overflow-hidden"
+                disabled={envError}
               >
                 <span className="relative z-10 flex items-center justify-center">
                   <FaUserPlus className="mr-2" />
@@ -293,6 +314,16 @@ const LandingPage = () => {
             </div>
           )}
         </div>
+        
+        {envError && (
+          <div className="text-center text-red-600 italic bg-red-50 p-4 rounded-lg border border-red-200 mb-6">
+            <p className="font-medium flex items-center justify-center">
+              <FaExclamationTriangle className="mr-2" />
+              API configuration error
+            </p>
+            <p>The application is not properly configured. Please contact the administrator.</p>
+          </div>
+        )}
         
         <div className="text-center text-gray-600 italic bg-blue-50/50 p-4 rounded-lg border border-blue-100">
           <p className="font-medium text-indigo-700">After signing in, you'll be redirected to the booking dashboard</p>
