@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext.jsx';
-import { supabase } from './supabaseClient';
+import { supabase, supabaseAdmin } from './supabaseClient';
 import { FaArrowLeft, FaSignOutAlt } from 'react-icons/fa';
 
 // List of admin emails - in a real app, this would be stored in the database
@@ -31,8 +31,13 @@ const AdminDashboard = () => {
       try {
         setIsLoading(true);
         
+        // Determine which Supabase client to use
+        // If supabaseAdmin is available, use it to bypass RLS
+        // Otherwise, fall back to regular supabase client
+        const client = supabaseAdmin || supabase;
+        
         // Create the query to fetch all bookings
-        let query = supabase.from('bookings').select('*');
+        let query = client.from('bookings').select('*');
         
         // Apply status filter if not "all"
         if (statusFilter !== 'all') {
@@ -46,8 +51,8 @@ const AdminDashboard = () => {
         console.log("Fetch error:", error);
         
         if (error) {
-          // If there's an error, it might be due to RLS policies
-          console.error("Error fetching bookings. This might be due to Row Level Security (RLS) policies.");
+          // If there's an error, it might be due to RLS policies or missing service key
+          console.error("Error fetching bookings:", error);
           throw error;
         }
         
@@ -59,7 +64,14 @@ const AdminDashboard = () => {
         setBookings(data || []);
       } catch (error) {
         console.error("Error in fetchBookings:", error);
-        setError(`${error.message} - Note: If you're only seeing your own bookings, you need to update the Supabase Row Level Security (RLS) policies to allow admins to view all bookings.`);
+        if (error.message.includes("permission denied")) {
+          setError(`Permission denied. This is likely because:
+          1. The VITE_SUPABASE_SERVICE_KEY environment variable is not set, or
+          2. The RLS policies need to be updated.
+          Please check the SUPABASE_RLS_SETUP.md file for instructions.`);
+        } else {
+          setError(error.message);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -72,7 +84,10 @@ const AdminDashboard = () => {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      const { error } = await supabase
+      // Use admin client if available
+      const client = supabaseAdmin || supabase;
+      
+      const { error } = await client
         .from('bookings')
         .update({ status: newStatus })
         .eq('id', id);
@@ -91,7 +106,10 @@ const AdminDashboard = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this booking?')) {
       try {
-        const { error } = await supabase
+        // Use admin client if available
+        const client = supabaseAdmin || supabase;
+        
+        const { error } = await client
           .from('bookings')
           .delete()
           .eq('id', id);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext.jsx';
-import { supabase } from './supabaseClient';
+import { supabase, supabaseAdmin } from './supabaseClient';
 
 const MyBookings = () => {
   const navigate = useNavigate();
@@ -9,6 +9,12 @@ const MyBookings = () => {
   const [bookings, setBookings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // List of admin emails - keep in sync with AdminDashboard.jsx
+  const ADMIN_EMAILS = ['adityatinkercad@gmail.com','ceo@adivirtus.com','pranav0423an@gmail.com'];
+  
+  // Check if user is admin
+  const isAdmin = user && ADMIN_EMAILS.includes(user.email);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -27,16 +33,39 @@ const MyBookings = () => {
     const fetchBookings = async () => {
       try {
         setIsLoading(true);
-        const { data, error } = await supabase
-          .from('bookings')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
         
-        if (error) throw error;
+        // Determine which Supabase client to use
+        // If user is admin and supabaseAdmin is available, use it to bypass RLS
+        // Otherwise, use regular supabase client
+        const client = (isAdmin && supabaseAdmin) ? supabaseAdmin : supabase;
+        
+        // Create query
+        let query = client.from('bookings').select('*');
+        
+        // If not admin, filter by user_id
+        if (!isAdmin || !supabaseAdmin) {
+          query = query.eq('user_id', user.id);
+        }
+        
+        // Execute query
+        const { data, error } = await query.order('created_at', { ascending: false });
+        
+        if (error) {
+          console.error("Error fetching bookings:", error);
+          throw error;
+        }
+        
         setBookings(data || []);
       } catch (error) {
-        setError(error.message);
+        console.error("Error in fetchBookings:", error);
+        if (error.message.includes("permission denied")) {
+          setError(`Permission denied. This is likely because:
+          1. The RLS policies need to be updated, or
+          2. For admin users, the VITE_SUPABASE_SERVICE_KEY environment variable is not set.
+          Please check the SUPABASE_RLS_SETUP.md file for instructions.`);
+        } else {
+          setError(error.message);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -45,7 +74,7 @@ const MyBookings = () => {
     if (user) {
       fetchBookings();
     }
-  }, [user]);
+  }, [user, isAdmin]);
 
   const getStatusBadgeClass = (status) => {
     switch (status) {

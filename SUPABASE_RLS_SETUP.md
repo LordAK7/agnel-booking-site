@@ -1,16 +1,44 @@
 # Supabase Row Level Security (RLS) Setup
 
-This document provides instructions on how to update the Supabase Row Level Security (RLS) policies to fix the issue where admin users can only see their own bookings instead of all bookings.
+This document provides instructions on how to fix the "permission denied for table users" error and allow admin users to see all bookings.
 
 ## The Issue
 
-Currently, admin users can only see bookings they created themselves, which is not the intended behavior. Admins should be able to see all bookings from all users.
+There are two main issues:
 
-This is likely due to the Row Level Security (RLS) policies in Supabase that restrict users to only seeing their own data.
+1. Admin users can only see bookings they created themselves
+2. The RLS policies are causing "permission denied for table users" errors
 
-## Solution: Update RLS Policies
+## Solution 1: Set Up Service Role Key (Recommended)
 
-Follow these steps to update the RLS policies in your Supabase project:
+The simplest solution is to use Supabase's service role key, which allows bypassing RLS policies for admin users.
+
+### Step 1: Get Your Supabase Service Role Key
+
+1. Log in to your [Supabase Dashboard](https://app.supabase.com/)
+2. Select your project
+3. Go to **Project Settings** → **API**
+4. Find the **service_role key** (it's labeled as "secret" and should be kept secure)
+
+### Step 2: Add the Service Role Key to Your Environment Variables
+
+Add this to your `.env` file:
+
+```
+VITE_SUPABASE_SERVICE_KEY=your_service_role_key_here
+```
+
+**Important**: Never commit this key to your repository. Make sure `.env` is in your `.gitignore` file.
+
+### Step 3: Restart Your Development Server
+
+After adding the environment variable, restart your development server for the changes to take effect.
+
+## Solution 2: Update RLS Policies (Alternative)
+
+If you prefer not to use the service role key, you can update your RLS policies to a simpler version that doesn't reference the `auth.users` table.
+
+Follow these steps:
 
 1. Log in to your [Supabase Dashboard](https://app.supabase.com/)
 2. Select your project
@@ -39,15 +67,13 @@ FOR SELECT
 USING (auth.uid() = user_id);
 
 -- Create policy for admins to view all bookings
--- Replace these emails with your admin emails if different
+-- This simpler version doesn't reference the auth.users table
 CREATE POLICY "Admins can view all bookings"
 ON bookings
 FOR SELECT
 USING (
-  EXISTS (
-    SELECT 1 FROM auth.users
-    WHERE auth.users.id = auth.uid()
-    AND auth.users.email IN ('adityatinkercad@gmail.com', 'ceo@adivirtus.com', 'pranav0423an@gmail.com')
+  (SELECT email FROM auth.users WHERE id = auth.uid()) IN (
+    'adityatinkercad@gmail.com', 'ceo@adivirtus.com', 'pranav0423an@gmail.com'
   )
 );
 
@@ -68,10 +94,8 @@ CREATE POLICY "Admins can update any booking"
 ON bookings
 FOR UPDATE
 USING (
-  EXISTS (
-    SELECT 1 FROM auth.users
-    WHERE auth.users.id = auth.uid()
-    AND auth.users.email IN ('adityatinkercad@gmail.com', 'ceo@adivirtus.com', 'pranav0423an@gmail.com')
+  (SELECT email FROM auth.users WHERE id = auth.uid()) IN (
+    'adityatinkercad@gmail.com', 'ceo@adivirtus.com', 'pranav0423an@gmail.com'
   )
 );
 
@@ -86,37 +110,28 @@ CREATE POLICY "Admins can delete any booking"
 ON bookings
 FOR DELETE
 USING (
-  EXISTS (
-    SELECT 1 FROM auth.users
-    WHERE auth.users.id = auth.uid()
-    AND auth.users.email IN ('adityatinkercad@gmail.com', 'ceo@adivirtus.com', 'pranav0423an@gmail.com')
+  (SELECT email FROM auth.users WHERE id = auth.uid()) IN (
+    'adityatinkercad@gmail.com', 'ceo@adivirtus.com', 'pranav0423an@gmail.com'
   )
 );
 ```
 
 ## Verification
 
-After running these SQL commands, you should:
+After implementing either solution, you should:
 
-1. Verify that the policies have been created correctly by going to **Authentication** → **Policies** in the Supabase dashboard
-2. Test that admin users can view all bookings by logging in as an admin and checking the admin dashboard
-3. Test that regular users can only view their own bookings
-
-## How RLS Works
-
-Row Level Security (RLS) in Supabase allows you to control which rows in a table a user can access. Policies are defined using SQL expressions that are evaluated for each row.
-
-In our case:
-- Regular users should only see bookings where `user_id` matches their own `auth.uid()`
-- Admin users should see all bookings regardless of who created them
+1. Verify that admin users can view all bookings by logging in as an admin and checking the admin dashboard
+2. Verify that regular users can only view their own bookings
+3. Check that there are no "permission denied" errors in the browser console
 
 ## Troubleshooting
 
-If you're still experiencing issues after updating the RLS policies:
+If you're still experiencing issues:
 
 1. Check the browser console for any errors
-2. Verify that your admin email is correctly listed in both:
+2. Verify that your admin email is correctly listed in:
    - The SQL policy (in the `IN` clause)
-   - The `ADMIN_EMAILS` array in the `AdminDashboard.jsx` file
+   - The `ADMIN_EMAILS` array in both the `AdminDashboard.jsx` and `MyBookings.jsx` files
 3. Make sure the `bookings` table has a `user_id` column that correctly stores the user's ID
-4. Try clearing your browser cache and logging in again 
+4. Try clearing your browser cache and logging in again
+5. If using Solution 1, verify that the service role key is correctly set in your environment variables 
