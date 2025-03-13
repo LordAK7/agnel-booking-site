@@ -30,22 +30,36 @@ const AdminDashboard = () => {
     const fetchBookings = async () => {
       try {
         setIsLoading(true);
+        
+        // Create the query to fetch all bookings
         let query = supabase.from('bookings').select('*');
         
+        // Apply status filter if not "all"
         if (statusFilter !== 'all') {
           query = query.eq('status', statusFilter);
         }
         
+        // Order by creation date, descending
         const { data, error } = await query.order('created_at', { ascending: false });
         
         console.log("Fetched bookings:", data);
         console.log("Fetch error:", error);
         
-        if (error) throw error;
+        if (error) {
+          // If there's an error, it might be due to RLS policies
+          console.error("Error fetching bookings. This might be due to Row Level Security (RLS) policies.");
+          throw error;
+        }
+        
+        // If no data or empty array, check if it might be due to RLS
+        if (!data || data.length === 0) {
+          console.warn("No bookings found or RLS might be restricting access. Check Supabase RLS policies.");
+        }
+        
         setBookings(data || []);
       } catch (error) {
         console.error("Error in fetchBookings:", error);
-        setError(error.message);
+        setError(`${error.message} - Note: If you're only seeing your own bookings, you need to update the Supabase Row Level Security (RLS) policies to allow admins to view all bookings.`);
       } finally {
         setIsLoading(false);
       }
@@ -171,7 +185,13 @@ const AdminDashboard = () => {
             {isLoading ? (
               <div className="text-center py-4">Loading bookings...</div>
             ) : bookings.length === 0 ? (
-              <div className="text-center py-4">No bookings found.</div>
+              <div className="text-center py-4">
+                <p className="mb-2">No bookings found.</p>
+                <p className="text-sm text-red-600">
+                  If you're an admin and expecting to see all bookings, you may need to update the Supabase Row Level Security (RLS) policies.
+                  Please refer to the SUPABASE_RLS_SETUP.md file for instructions.
+                </p>
+              </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
