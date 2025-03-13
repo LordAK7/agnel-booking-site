@@ -271,7 +271,7 @@ const LandingPage = () => {
           <div className="bg-indigo-50 p-6 rounded-xl shadow-md border border-indigo-100 flex flex-col items-center transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
             <FaCalendarAlt className="text-indigo-600 text-3xl mb-3" />
             <h3 className="font-semibold text-lg text-indigo-800 mb-2">Modern Facilities</h3>
-            <p className="text-center text-gray-600">State-of-the-art AV equipment, seating for 120 people, and climate control</p>
+            <p className="text-center text-gray-600">State-of-the-art AV equipment, seating for 120 people, and Air Conditioned</p>
           </div>
           
           <div className="bg-purple-50 p-6 rounded-xl shadow-md border border-purple-100 flex flex-col items-center transform transition-all duration-300 hover:scale-105 hover:shadow-lg">
