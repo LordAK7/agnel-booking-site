@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaMapMarkerAlt, FaCalendarAlt, FaUsersCog, FaLinkedin, FaGlobe, FaBuilding } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import { useAuth } from './AuthContext.jsx';
 
 const LandingPage = () => {
   const navigate = useNavigate();
   const [showSocials, setShowSocials] = useState(false);
+  const { user } = useAuth();
 
   const handleSignIn = () => {
     navigate('/signin');
@@ -67,6 +70,15 @@ const LandingPage = () => {
       </div>
       
       <div className="max-w-4xl w-full bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl p-8 md:p-12 z-10 border border-white/50">
+        {/* Logo added here */}
+        <div className="flex justify-center mb-6">
+          <img 
+            src="/apv_logo.webp" 
+            alt="Father Agnel Polytechnic Logo" 
+            className="h-24 md:h-32 object-contain filter drop-shadow-md"
+          />
+        </div>
+        
         <div className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-bold text-indigo-800 mb-4">Father Agnel Polytechnic, Vashi</h1>
           <h2 className="text-2xl md:text-3xl font-semibold text-blue-600 mb-6">Seminar Hall 401</h2>
@@ -98,19 +110,33 @@ const LandingPage = () => {
         </div>
         
         <div className="flex flex-col sm:flex-row gap-6 justify-center mb-8">
-          <button
-            onClick={handleSignIn}
-            className="px-10 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-indigo-700 transition duration-300 shadow-lg transform hover:-translate-y-1 hover:shadow-xl"
-          >
-            Sign In
-          </button>
-          
-          <button
-            onClick={handleSignUp}
-            className="px-10 py-4 bg-white text-indigo-600 font-medium rounded-lg border-2 border-indigo-500 hover:bg-indigo-50 transition duration-300 shadow-md transform hover:-translate-y-1 hover:shadow-lg"
-          >
-            Sign Up
-          </button>
+          {!user ? (
+            <>
+              <button
+                onClick={handleSignIn}
+                className="px-10 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-600 hover:to-indigo-700 transition duration-300 shadow-lg transform hover:-translate-y-1 hover:shadow-xl"
+              >
+                Sign In
+              </button>
+              
+              <button
+                onClick={handleSignUp}
+                className="px-10 py-4 bg-white text-indigo-600 font-medium rounded-lg border-2 border-indigo-500 hover:bg-indigo-50 transition duration-300 shadow-md transform hover:-translate-y-1 hover:shadow-lg"
+              >
+                Sign Up
+              </button>
+            </>
+          ) : (
+            <div className="flex items-center space-x-4">
+              <span className="text-gray-700">Welcome, {user.email}</span>
+              <button 
+                onClick={handleSignOut} 
+                className="text-red-600 hover:text-red-800"
+              >
+                Sign Out
+              </button>
+            </div>
+          )}
         </div>
         
         <div className="text-center text-gray-600 italic bg-blue-50/50 p-4 rounded-lg border border-blue-100">

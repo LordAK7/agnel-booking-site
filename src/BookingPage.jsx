@@ -4,6 +4,7 @@ import { useAuth } from './AuthContext.jsx';
 import Calendar from 'react-calendar';
 import { supabase } from './supabaseClient';
 import 'react-calendar/dist/Calendar.css';
+import { Link } from 'react-router-dom';
 
 const BookingPage = () => {
   const navigate = useNavigate();
@@ -22,6 +23,11 @@ const BookingPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+
+  // Add a console log to debug
+  useEffect(() => {
+    console.log("Auth state:", { user, loading });
+  }, [user, loading]);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -126,6 +132,11 @@ const BookingPage = () => {
     }
   };
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -136,9 +147,46 @@ const BookingPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900">Book a Venue</h1>
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center">
+              <img 
+                src="/apv_logo.webp" 
+                alt="APV Logo" 
+                className="h-12 w-auto mr-4" 
+              />
+              <h1 className="text-2xl font-bold text-gray-900">Agnel Booking</h1>
+            </div>
+            <div>
+              {user ? (
+                <div className="flex items-center space-x-4">
+                  <span className="text-gray-700">Welcome, {user.email}</span>
+                  <button 
+                    onClick={handleSignOut} 
+                    className="text-red-600 hover:text-red-800 px-4 py-2 rounded-lg border border-red-600 hover:bg-red-50"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-4">
+                  <Link
+                    to="/signin"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="ml-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50 hover:text-indigo-700 border-indigo-600"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </header>
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
