@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from './AuthContext.jsx';
 import Calendar from 'react-calendar';
 import { supabase } from './supabaseClient';
 import 'react-calendar/dist/Calendar.css';
-import { Link } from 'react-router-dom';
 
 const BookingPage = () => {
   const navigate = useNavigate();
@@ -151,13 +150,38 @@ const BookingPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center">
-              <img 
-                src="/apv_logo.webp" 
-                alt="APV Logo" 
-                className="h-12 w-auto mr-4" 
-              />
+              <Link to="/">
+                <img 
+                  src="/apv_logo.webp" 
+                  alt="APV Logo" 
+                  className="h-12 w-auto mr-4 cursor-pointer" 
+                />
+              </Link>
               <h1 className="text-2xl font-bold text-gray-900">Agnel Booking</h1>
             </div>
+            
+            {/* Add navigation menu here */}
+            <div className="hidden md:flex items-center space-x-6">
+              <Link 
+                to="/dashboard" 
+                className="text-gray-700 hover:text-blue-600 font-medium"
+              >
+                Dashboard
+              </Link>
+              <Link 
+                to="/booking" 
+                className="text-blue-600 font-medium border-b-2 border-blue-600 pb-1"
+              >
+                Create Booking
+              </Link>
+              <Link 
+                to="/my-bookings" 
+                className="text-gray-700 hover:text-blue-600 font-medium"
+              >
+                My Bookings
+              </Link>
+            </div>
+            
             <div>
               {user ? (
                 <div className="flex items-center space-x-4">
@@ -189,6 +213,33 @@ const BookingPage = () => {
           </div>
         </div>
       </header>
+      
+      {/* Mobile navigation menu (visible on small screens) */}
+      <div className="md:hidden bg-white border-t border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between py-3">
+            <Link 
+              to="/dashboard" 
+              className="text-gray-700 hover:text-blue-600 text-sm font-medium"
+            >
+              Dashboard
+            </Link>
+            <Link 
+              to="/booking" 
+              className="text-blue-600 text-sm font-medium border-b-2 border-blue-600"
+            >
+              Create Booking
+            </Link>
+            <Link 
+              to="/my-bookings" 
+              className="text-gray-700 hover:text-blue-600 text-sm font-medium"
+            >
+              My Bookings
+            </Link>
+          </div>
+        </div>
+      </div>
+      
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="bg-white shadow overflow-hidden sm:rounded-lg p-6">
           {success && (
