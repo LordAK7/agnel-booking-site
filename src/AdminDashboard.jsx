@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext.jsx';
 import { supabase } from './supabaseClient';
+import { FaArrowLeft, FaSignOutAlt } from 'react-icons/fa';
 
 // List of admin emails - in a real app, this would be stored in the database
 const ADMIN_EMAILS = ['adityatinkercad@gmail.com','ceo@adivirtus.com','pranav0423an@gmail.com'];
@@ -96,6 +97,10 @@ const AdminDashboard = () => {
     navigate('/');
   };
 
+  const handleNavigateToDashboard = () => {
+    navigate('/dashboard');
+  };
+
   if (loading || !isAdmin) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -106,17 +111,36 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <button
-            onClick={handleSignOut}
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-          >
-            Sign Out
-          </button>
+      <nav className="bg-indigo-800 text-white shadow-md">
+        <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <img 
+              src="/apv_logo.webp" 
+              alt="Logo" 
+              className="h-10"
+            />
+            <span className="font-bold text-xl">Admin Dashboard</span>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            <button 
+              onClick={handleNavigateToDashboard}
+              className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-indigo-700 hover:bg-indigo-600 transition-colors"
+            >
+              <FaArrowLeft />
+              <span>Back to Dashboard</span>
+            </button>
+            
+            <button 
+              onClick={handleSignOut}
+              className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-red-600 hover:bg-red-500 transition-colors"
+            >
+              <FaSignOutAlt />
+              <span>Sign Out</span>
+            </button>
+          </div>
         </div>
-      </header>
+      </nav>
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="bg-white shadow overflow-hidden sm:rounded-lg">
