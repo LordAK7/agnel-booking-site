@@ -8,6 +8,8 @@ import BookingPage from './BookingPage'
 import MyBookings from './MyBookings'
 import AdminDashboard from './AdminDashboard'
 import { AuthProvider } from './AuthContext.jsx'
+import ForgotPassword from './ForgotPassword'
+import ResetPassword from './ResetPassword'
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
           <Route path="/booking" element={<BookingPage />} />
           <Route path="/my-bookings" element={<MyBookings />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>

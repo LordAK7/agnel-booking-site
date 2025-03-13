@@ -4,7 +4,7 @@ import { useAuth } from './AuthContext.jsx';
 import { supabase } from './supabaseClient';
 
 // List of admin emails - in a real app, this would be stored in the database
-const ADMIN_EMAILS = ['adityatinkercad@gmail.com'];
+const ADMIN_EMAILS = ['adityatinkercad@gmail.com','ceo@adivirtus.com','pranav0423an@gmail.com'];
 
 const AdminDashboard = () => {
   const navigate = useNavigate();

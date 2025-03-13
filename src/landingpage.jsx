@@ -68,8 +68,8 @@ const LandingPage = () => {
       
       <div className="max-w-4xl w-full bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl p-8 md:p-12 z-10 border border-white/50">
         <div className="text-center mb-10">
-          <h1 className="text-4xl md:text-5xl font-bold text-indigo-800 mb-4">Seminar Hall 401</h1>
-          <h2 className="text-2xl md:text-3xl font-semibold text-blue-600 mb-6">Father Agnel Polytechnic, Vashi</h2>
+          <h1 className="text-4xl md:text-5xl font-bold text-indigo-800 mb-4">Father Agnel Polytechnic, Vashi</h1>
+          <h2 className="text-2xl md:text-3xl font-semibold text-blue-600 mb-6">Seminar Hall 401</h2>
           <div className="w-32 h-1 bg-gradient-to-r from-blue-500 to-indigo-600 mx-auto mb-8 rounded-full"></div>
           
           <p className="text-lg text-gray-700 mb-4">Welcome to the official booking portal for Seminar Hall 401.</p>
