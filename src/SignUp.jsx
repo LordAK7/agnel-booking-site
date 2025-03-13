@@ -51,7 +51,7 @@ const SignUp = () => {
             full_name: fullName,
             phone: mobileNumber
           },
-          emailRedirectTo: window.location.origin + '/signin'
+          emailRedirectTo: window.location.origin + '/signin?verified=true'
         }
       });
       

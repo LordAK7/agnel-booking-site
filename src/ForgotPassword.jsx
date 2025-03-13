@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from './supabaseClient';
 
+const redirectBase = import.meta.env.PROD 
+  ? 'https://agnel-booking-site.pages.dev' 
+  : 'http://localhost:5173';
+
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -17,7 +21,7 @@ const ForgotPassword = () => {
     try {
       // Call Supabase password reset API
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${redirectBase}/reset-password`
       });
       
       if (resetError) throw resetError;
